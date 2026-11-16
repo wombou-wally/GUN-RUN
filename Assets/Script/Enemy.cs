@@ -10,7 +10,7 @@ public class Enemy : MonoBehaviour, IDamageable
         Debug.Log("Health:" + health);
         if (health <= 0)
         {
-            
+            //kljngg
             Debug.Log("Death");
         }
     }
