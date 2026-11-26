@@ -6,12 +6,17 @@ public class Gun : MonoBehaviour
     [Tooltip("The ray cast origin position")][SerializeField] private Transform muzzle;
     [Tooltip("Gun Range")][SerializeField] private float gunRange = 20f;
     [Tooltip("Gun Damage")][SerializeField] private float damage = 20f;
+
     [Header("Timing")]
     [Tooltip("Shoot cool down")][SerializeField] private float fireRate = 0.5f;
-    private Rigidbody rb;
+
+    [Header("Recoil")]
     [SerializeField][Tooltip("Recoil force")] private float recoilForce = 1.0f;
     [SerializeField][Tooltip("Recoil force")] private float torqueForce = 1.0f;
-
+    [Header("Bullet")]
+    [Tooltip("Visual bullet prefab")][SerializeField] private Bullet bulletPrefab;
+    [SerializeField][Tooltip("Bullet Speed")] private float bulletSpeed = 50.0f;
+    private Rigidbody rb;
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -20,11 +25,13 @@ public class Gun : MonoBehaviour
     private float nextFireTime = 0f;
     public void Shoot()
     {
+        Vector3 endpoint = muzzle.position + muzzle.forward * gunRange;
         RaycastHit hit;
         Debug.DrawRay(muzzle.position, muzzle.forward * gunRange, Color.red, 5);
-        Recoil();
+        
         if (Physics.Raycast(muzzle.position, muzzle.forward, out hit, gunRange))
         {
+            endpoint = hit.point;
             if (hit.collider.TryGetComponent<IDamageable>(out var damageable))
             {
                 damageable.TakeDamage(damage);
@@ -32,6 +39,9 @@ public class Gun : MonoBehaviour
 
             Debug.Log(hit.collider.gameObject);
         }
+        Bullet newBullet = Instantiate(bulletPrefab, muzzle.position, muzzle.rotation);
+        newBullet.Launch(endpoint, bulletSpeed);
+        Recoil();
 
     }
     private void Update()
